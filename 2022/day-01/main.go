@@ -10,12 +10,12 @@ import (
 )
 
 func main() {
+	task1()
 	task2()
 }
 
-func task() {
-	f, err := os.Open("file.txt")
-
+func task1() {
+	f, err := os.Open("input.txt")
 	if err != nil {
 		log.Fatalf("An error occured: %v", err)
 	}
@@ -36,16 +36,15 @@ func task() {
 			cur += x_int
 		}
 	}
-
 	if err := scanner.Err(); err != nil {
 		fmt.Println(err)
 	}
+
 	fmt.Println(max)
 }
 
 func task2() {
-	f, err := os.Open("file.txt")
-
+	f, err := os.Open("input.txt")
 	if err != nil {
 		log.Fatalf("An error occured: %v", err)
 	}
@@ -64,10 +63,10 @@ func task2() {
 			cur += x_int
 		}
 	}
-
 	if err := scanner.Err(); err != nil {
 		fmt.Println(err)
 	}
+
 	sort.Slice(max, func(i, j int) bool {
 		return max[i] > max[j]
 	})

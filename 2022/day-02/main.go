@@ -18,7 +18,6 @@ func task1() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	defer f.Close()
 
 	var sum int = 0
@@ -51,10 +50,10 @@ func task1() {
 			}
 		}
 	}
-
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
 	}
+
 	fmt.Println(sum)
 }
 
@@ -63,7 +62,6 @@ func task2() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	defer f.Close()
 
 	var sum int = 0
@@ -96,9 +94,9 @@ func task2() {
 			}
 		}
 	}
-
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
 	}
+
 	fmt.Println(sum)
 }
