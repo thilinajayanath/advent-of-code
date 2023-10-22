@@ -66,6 +66,6 @@ func task2() {
 }
 
 func main() {
-	task1()
+	// task1()
 	task2()
 }
