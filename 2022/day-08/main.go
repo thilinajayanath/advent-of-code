@@ -118,7 +118,6 @@ func task2(arr [][]int) {
 	arrLen := len(arr)
 
 	for i := 0; i < arrLen; i++ {
-		// intArrLen := len(arr[0]) - 1
 		for k, v := range arr[i] {
 			scenicScore := checkUpT2(arr, v, i, k) * checkDownT2(arr, v, i, k) * checkLeftT2(arr[i], v, k) * checkRightT2(arr[i], v, k)
 
