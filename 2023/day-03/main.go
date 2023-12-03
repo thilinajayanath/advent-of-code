@@ -148,26 +148,18 @@ func task2(lines []string) {
 							fmt.Println(err.Error())
 						}
 						vals = append(vals, val)
-						// fmt.Println(num, val, p)
 					}
 				}
 			}
 
 			numsLine := re.FindAllStringIndex(lines[p.y], -1)
 			for _, num := range numsLine {
-				// if p.y == 10 {
-				// 	fmt.Println(p, num)
-				// }
-
 				if p.x-num[1] == 0 || p.x-num[0] == -1 {
 					val, err := strconv.Atoi(lines[p.y][num[0]:num[1]])
 					if err != nil {
 						fmt.Println(err.Error())
 					}
 					vals = append(vals, val)
-					// if p.y == 10 {
-					// 	fmt.Println(num, val, p)
-					// }
 				}
 			}
 
@@ -189,8 +181,6 @@ func task2(lines []string) {
 		if len(vals) == 2 {
 			sum += vals[0] * vals[1]
 		}
-
 	}
-
 	fmt.Println(sum)
 }
