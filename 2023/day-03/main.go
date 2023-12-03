@@ -17,7 +17,6 @@ type pos struct {
 var specialChars map[pos]bool
 
 func main() {
-
 	f, err := os.Open("input.txt")
 	if err != nil {
 		log.Fatalf("An error occured: %v", err)
@@ -69,7 +68,7 @@ func main() {
 	task2(lines)
 }
 
-func checkSpecialCharProyimitx(start, end, lineNum, numOfLines, lineLength int) bool {
+func checkSpecialCharProyimity(start, end, lineNum, numOfLines, lineLength int) bool {
 	if start < 0 {
 		start = 0
 	}
@@ -108,6 +107,7 @@ func checkSpecialCharProyimitx(start, end, lineNum, numOfLines, lineLength int) 
 			}
 		}
 	}
+
 	return false
 }
 
@@ -120,7 +120,7 @@ func task1(lines []string) {
 		re := regexp.MustCompile(`\d+`)
 		nums := re.FindAllStringIndex(line, -1)
 		for _, num := range nums {
-			if checkSpecialCharProyimitx(num[0]-1, num[1], k, arrLength, lineLen) {
+			if checkSpecialCharProyimity(num[0]-1, num[1], k, arrLength, lineLen) {
 				v, err := strconv.Atoi(line[num[0]:num[1]])
 				if err != nil {
 					fmt.Println(err.Error())
@@ -135,8 +135,10 @@ func task1(lines []string) {
 
 func task2(lines []string) {
 	var sum int
+
 	for p, v := range specialChars {
 		vals := []int{}
+
 		if v {
 			re := regexp.MustCompile(`\d+`)
 			if p.y >= 1 {
@@ -182,5 +184,6 @@ func task2(lines []string) {
 			sum += vals[0] * vals[1]
 		}
 	}
+
 	fmt.Println(sum)
 }
