@@ -7,6 +7,7 @@ import (
 	"os"
 	"regexp"
 	"strconv"
+	"unicode"
 )
 
 type pos struct {
@@ -40,25 +41,11 @@ func main() {
 		for j, c := range l {
 			if string(c) == "." {
 				continue
-			} else if string(c) == "@" {
-				specialChars[pos{y: i, x: j}] = false
-			} else if string(c) == "#" {
-				specialChars[pos{y: i, x: j}] = false
-			} else if string(c) == "$" {
-				specialChars[pos{y: i, x: j}] = false
-			} else if string(c) == "%" {
-				specialChars[pos{y: i, x: j}] = false
-			} else if string(c) == "-" {
-				specialChars[pos{y: i, x: j}] = false
-			} else if string(c) == "&" {
-				specialChars[pos{y: i, x: j}] = false
+			} else if unicode.IsDigit(c) {
+				continue
 			} else if string(c) == "*" {
 				specialChars[pos{y: i, x: j}] = true
-			} else if string(c) == "+" {
-				specialChars[pos{y: i, x: j}] = false
-			} else if string(c) == "/" {
-				specialChars[pos{y: i, x: j}] = false
-			} else if string(c) == "=" {
+			} else {
 				specialChars[pos{y: i, x: j}] = false
 			}
 		}
