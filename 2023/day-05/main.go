@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"regexp"
-	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -31,8 +30,9 @@ func main() {
 		fmt.Println(err)
 	}
 
-	task1(lines)
-	task2(lines)
+	// task1(lines)
+	// task2(lines)
+	t2alternative(lines)
 }
 
 type container struct {
@@ -93,16 +93,6 @@ func doStuff(lines []string, seeds []int) int {
 	return min
 }
 
-func t2helper(start int, end int, lines []string, wg *sync.WaitGroup, ch chan int) {
-	seeds := []int{}
-	for i := start; i < start+end; i++ {
-		seeds = append(seeds, i)
-	}
-
-	ch <- doStuff(lines, seeds)
-	wg.Done()
-}
-
 func task1(lines []string) {
 	seeds := []int{}
 
@@ -116,7 +106,17 @@ func task1(lines []string) {
 	fmt.Println(doStuff(lines[2:], seeds))
 }
 
-// consumed about 40 GB of memory + paged memory when running this
+func t2Helper(start int, end int, lines []string, wg *sync.WaitGroup, ch chan int) {
+	seeds := []int{}
+	for i := start; i < start+end; i++ {
+		seeds = append(seeds, i)
+	}
+
+	ch <- doStuff(lines, seeds)
+	wg.Done()
+}
+
+// consumed about 43 GB of memory + paged memory when running this
 func task2(lines []string) {
 	numbers := strings.Split(strings.Split(lines[0], ": ")[1], " ")
 	seedArr := []int{}
@@ -131,22 +131,127 @@ func task2(lines []string) {
 
 	threadCount := 0
 	for i := 0; i < len(seedArr)-1; i += 2 {
-		go t2helper(seedArr[i], seedArr[i+1], lines[2:], &wg, ch)
+		go t2Helper(seedArr[i], seedArr[i+1], lines[2:], &wg, ch)
 		threadCount++
 		wg.Add(1)
 	}
 
-	minValues := []int{}
+	var minValue int
 	for v := range ch {
 		threadCount--
-		minValues = append(minValues, v)
+		if minValue == 0 {
+			minValue = v
+		} else if minValue > v {
+			minValue = v
+		}
+
 		if threadCount == 0 {
 			break
 		}
 	}
 	wg.Wait()
-	sort.Slice(minValues, func(i, j int) bool {
-		return minValues[i] < minValues[j]
-	})
-	fmt.Println(minValues[0])
+
+	fmt.Println(minValue)
+}
+
+// alternative solution for task 2 which uses much less memory
+
+func doStuffAlt(lines *[]string, keys *[]string, almanac map[string][]container, seed int) int {
+	var tmp int
+
+	tmp = seed
+	for _, key := range *keys {
+		val := tmp
+		for _, c := range almanac[key] {
+			if tmp >= c.src && tmp < c.src+c.srcRange {
+				val = tmp - c.src + c.dest
+			}
+		}
+
+		tmp = val
+		if key == "location" {
+			return val
+		}
+	}
+
+	return -1
+}
+
+func t2HelperAlt(start int, end int, lines *[]string, keys *[]string, almanac map[string][]container, wg *sync.WaitGroup, ch chan int) {
+	min := 0
+	for i := start; i < start+end; i++ {
+		val := doStuffAlt(lines, keys, almanac, i)
+		if min == 0 {
+			min = val
+		} else if min > val {
+			min = val
+		}
+	}
+
+	ch <- min
+	wg.Done()
+}
+
+// This uses 1.7 MB of memory
+func t2alternative(lines []string) {
+	numbers := strings.Split(strings.Split(lines[0], ": ")[1], " ")
+	seedArr := []int{}
+	for _, n := range numbers {
+		val, _ := strconv.Atoi(n)
+		seedArr = append(seedArr, val)
+	}
+
+	almanac := make(map[string][]container)
+	newLines := lines[2:]
+
+	var key string
+	keys := []string{}
+	for _, line := range newLines {
+		if len(line) == 0 {
+			continue
+		}
+
+		if unicode.IsLetter(rune(line[0])) {
+			splittedLine := strings.Split(line, " ")
+			key = strings.Split(splittedLine[0], "-")[2]
+			keys = append(keys, key)
+		} else {
+			re := regexp.MustCompile(`\d+`)
+			vals := re.FindAllString(line, -1)
+
+			c := container{}
+			c.dest, _ = strconv.Atoi(vals[0])
+			c.src, _ = strconv.Atoi(vals[1])
+			c.srcRange, _ = strconv.Atoi(vals[2])
+			almanac[key] = append(almanac[key], c)
+		}
+	}
+
+	var wg sync.WaitGroup
+	ch := make(chan int)
+	defer close(ch)
+
+	threadCount := 0
+	for i := 0; i < len(seedArr)-1; i += 2 {
+		go t2HelperAlt(seedArr[i], seedArr[i+1], &newLines, &keys, almanac, &wg, ch)
+		threadCount++
+		wg.Add(1)
+	}
+
+	var minValue int
+	for v := range ch {
+		threadCount--
+		if minValue == 0 {
+			minValue = v
+		} else if minValue > v {
+			minValue = v
+		}
+
+		if threadCount == 0 {
+			break
+		}
+	}
+	wg.Wait()
+
+	fmt.Println(minValue)
 }
