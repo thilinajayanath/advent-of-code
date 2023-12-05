@@ -132,4 +132,5 @@ func task2(lines []string) {
 	}
 	fmt.Println(len(seeds))
 	// doStuff(lines[2:], seeds)
+	// revisit later
 }
