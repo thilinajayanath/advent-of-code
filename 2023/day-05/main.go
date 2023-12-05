@@ -6,8 +6,10 @@ import (
 	"log"
 	"os"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"unicode"
 )
 
@@ -39,14 +41,8 @@ type container struct {
 	srcRange int
 }
 
-type req struct {
-	name string
-	val  int
-}
-
-func doStuff(lines []string, seeds []int) {
+func doStuff(lines []string, seeds []int) int {
 	almanac := make(map[string][]container)
-	seedReq := make(map[int][]req)
 
 	var key string
 	keys := []string{}
@@ -72,6 +68,7 @@ func doStuff(lines []string, seeds []int) {
 	}
 
 	var tmp int
+	var min int
 	for _, seed := range seeds {
 		tmp = seed
 		for _, key := range keys {
@@ -82,25 +79,28 @@ func doStuff(lines []string, seeds []int) {
 				}
 			}
 
-			seedReq[seed] = append(seedReq[seed], req{name: key, val: val})
 			tmp = val
-		}
-	}
-
-	var min int
-	for _, sq := range seedReq {
-		for _, r := range sq {
-			if r.name == "location" {
+			if key == "location" {
 				if min == 0 {
-					min = r.val
-				} else if min > r.val {
-					min = r.val
+					min = val
+				} else if min > val {
+					min = val
 				}
 			}
 		}
 	}
 
-	fmt.Println(min)
+	return min
+}
+
+func t2helper(start int, end int, lines []string, wg *sync.WaitGroup, ch chan int) {
+	seeds := []int{}
+	for i := start; i < start+end; i++ {
+		seeds = append(seeds, i)
+	}
+
+	ch <- doStuff(lines, seeds)
+	wg.Done()
 }
 
 func task1(lines []string) {
@@ -113,9 +113,10 @@ func task1(lines []string) {
 			seeds = append(seeds, val)
 		}
 	}
-	doStuff(lines[2:], seeds)
+	fmt.Println(doStuff(lines[2:], seeds))
 }
 
+// consumed about 40 GB of memory + paged memory because I created an
 func task2(lines []string) {
 	numbers := strings.Split(strings.Split(lines[0], ": ")[1], " ")
 	seedArr := []int{}
@@ -123,14 +124,29 @@ func task2(lines []string) {
 		val, _ := strconv.Atoi(n)
 		seedArr = append(seedArr, val)
 	}
-	fmt.Println(len(seedArr))
-	seeds := []int{}
+
+	var wg sync.WaitGroup
+	ch := make(chan int)
+	defer close(ch)
+
+	threadCount := 0
 	for i := 0; i < len(seedArr)-1; i += 2 {
-		for j := seedArr[i]; j < seedArr[i]+seedArr[i+1]; j++ {
-			seeds = append(seeds, j)
+		go t2helper(seedArr[i], seedArr[i+1], lines[2:], &wg, ch)
+		threadCount++
+		wg.Add(1)
+	}
+
+	minValues := []int{}
+	for v := range ch {
+		threadCount--
+		minValues = append(minValues, v)
+		if threadCount == 0 {
+			break
 		}
 	}
-	fmt.Println(len(seeds))
-	// doStuff(lines[2:], seeds)
-	// revisit later
+	wg.Wait()
+	sort.Slice(minValues, func(i, j int) bool {
+		return minValues[i] < minValues[j]
+	})
+	fmt.Println(minValues[0])
 }
