@@ -116,7 +116,7 @@ func task1(lines []string) {
 	fmt.Println(doStuff(lines[2:], seeds))
 }
 
-// consumed about 40 GB of memory + paged memory because I created an
+// consumed about 40 GB of memory + paged memory when running this
 func task2(lines []string) {
 	numbers := strings.Split(strings.Split(lines[0], ": ")[1], " ")
 	seedArr := []int{}
